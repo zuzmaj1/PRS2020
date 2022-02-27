@@ -21,7 +21,11 @@ public class TwoThreads {
         @Override // override method from superclass
         public void run() {
             for (int i = 1; i <= 500; i++) {
-                System.out.println("Loop " + this.loopNum + ", Iteration: " + i);
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    System.out.println("Loop " + this.loopNum + ", Iteration: " + i);
+                }
             }
         }
     }
