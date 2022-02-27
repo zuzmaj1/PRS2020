@@ -24,8 +24,9 @@ public class TwoThreads {
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
-                    System.out.println("Loop " + this.loopNum + ", Iteration: " + i);
+                    System.out.println(e);
                 }
+                System.out.println("Loop " + this.loopNum + ", Iteration: " + i);
             }
         }
     }
