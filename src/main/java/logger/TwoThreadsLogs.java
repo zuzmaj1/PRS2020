@@ -6,6 +6,7 @@ public class TwoThreadsLogs {
 
     public static Logger log = Logger.getLogger(TwoThreadsLogs.class);
     public static Integer i = 0;
+    public static Long jakaś =0L;
 
     public static void main(String[] args) {
 
@@ -36,8 +37,10 @@ public class TwoThreadsLogs {
         public void run() {
             while (i <= 500) {
                 log.info("Loop " + this.loopNum + ", Read: " + i);
-                i = i + 1;
-                log.info("Loop " + this.loopNum + ", Write: " + i);
+                synchronized (jakaś) {
+                    i = i + 1;
+                    log.info("Loop " + this.loopNum + ", Write: " + i);
+                }
             }
         }
     }
