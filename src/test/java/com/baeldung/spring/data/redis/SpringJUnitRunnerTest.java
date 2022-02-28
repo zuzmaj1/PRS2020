@@ -35,7 +35,7 @@ public class SpringJUnitRunnerTest {
         redisServer.stop();
     }
 
-    @Test
+    @Test(timeout = 30000)
     public void testOnMessage() throws Exception {
         tester.testAllTaskFinish(10, new MyExecutor());
     }
