@@ -17,34 +17,40 @@ public class RedisMessageSubscriberAck implements MessageListener {
         this.ack =  new HashMap<>();
     }
 
-    @Override public void onMessage(Message message, byte[] bytes) {
+    @Override public synchronized void onMessage(Message message, byte[] bytes) {
         Long key = Long.valueOf(message.toString());
         if (ack.containsKey(key)) {
             Long value = ack.get(key);
-            ack.put(key, value + 1L);
+            if(value < 2) {
+                ack.put(key, value + 1L);
+                notifyAll();
+            }
+            System.out.println("AckMess: " + message);
         } else {
             ack.put(key, 1L);
+            notifyAll();
         }
     }
 
-    public void waitOnStart(Long key) throws InterruptedException {
+    public synchronized void waitOnStart(Long key) throws InterruptedException {
         // change to lock / notify scenario - non active waiting
         while(!ack.containsKey(key) || ack.get(key)!=1L) {
-            Thread.sleep(10);
+            wait();
         }
     }
 
-    public void waitOnEnd(Long key) throws InterruptedException {
+    public synchronized void waitOnEnd(Long key) throws InterruptedException {
         // change to lock / notify scenario - non active waiting
         while(!ack.containsKey(key) || ack.get(key)!=2L) {
-            Thread.sleep(10);
+            wait();
         }
     }
 
-    public void waitForAll(long size) throws InterruptedException {
+    public synchronized void waitForAll(long size) throws InterruptedException {
         // change to lock / notify scenario - non active waiting
         while(ack.size() < size || ack.values().stream().allMatch(value -> value == 2) == false){
-            Thread.sleep(1000);
+            wait();
+            System.out.println(ack.size() + " < " + size + " " + ack.keySet() +ack.values());
         }
     }
 }

@@ -14,23 +14,29 @@ import org.springframework.stereotype.Service;
 @Service
 public class RedisMessageSubscriberTask implements MessageListener {
 
-    final static Logger logger = LoggerFactory.getLogger(RedisMessageSubscriberTask.class);    final
-    ConcurrentHashMap<Long, Long> state;
-    final
-    RedisMessagePublisherAck redisMessagePublisher;
+    final static Logger logger = LoggerFactory.getLogger(RedisMessageSubscriberTask.class);
+    final ConcurrentHashMap<Long, Long> state;
+    final RedisMessagePublisherAck redisMessagePublisher;
     public RedisMessageSubscriberTask(ConcurrentHashMap<Long, Long> state,
-            @Qualifier("publisherAck") RedisMessagePublisherAck redisMessagePublisher) {
+                                      @Qualifier("publisherAck") RedisMessagePublisherAck redisMessagePublisher) {
         this.state = state;
         this.redisMessagePublisher = redisMessagePublisher;
     }
 
-    @Override public void onMessage(Message message, byte[] bytes) {
+    @Override public synchronized void onMessage(Message message, byte[] bytes) {
         Long key = Long.valueOf(message.toString());
-        if (state.containsKey(key)) {
-            Long value = state.get(key);
-            state.put(key, value+1L);
-        } else {
-            state.put(key, 1L);
+        synchronized (state){
+            if (state.containsKey(key)) {
+                Long value = state.get(key);
+                if(value < 2) {
+                    state.put(key, value + 1L);
+                    notifyAll();
+                }
+                System.out.println("TaskMess: " + message);
+            } else {
+                state.put(key, 1L);
+                notifyAll();
+            }
         }
         logger.info("Task: " + message.toString() + " state " + (state.get(key)==1 ? "start" : "end"));
         redisMessagePublisher.publish(key);
