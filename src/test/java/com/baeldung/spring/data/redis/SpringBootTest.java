@@ -35,6 +35,6 @@ public class SpringBootTest {
 
     @Test
     public void testOnMessage() throws Exception {
-        tester.testAllTaskFinish(1000, new MyExecutor());
+        tester.testAllTaskFinish(50, new MyExecutor());
     }
 }

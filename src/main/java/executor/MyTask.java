@@ -1,11 +1,13 @@
 package executor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 
 import com.baeldung.spring.data.redis.queue.RedisMessagePublisherTask;
 import com.baeldung.spring.data.redis.queue.RedisMessageSubscriberAck;
 
+@Slf4j
 public class MyTask implements RunnableWithType {
 
     RedisMessagePublisherTask redisMessagePublisher;
@@ -27,7 +29,7 @@ public class MyTask implements RunnableWithType {
     @SneakyThrows @Override public void run() {
         redisMessagePublisher.publish(id);
         ((RedisMessageSubscriberAck) redisMessageListener.getDelegate()).waitOnStart(id);
-        // task code
+        log.info("Task {} {}", id, type);
         redisMessagePublisher.publish(id);
         ((RedisMessageSubscriberAck) redisMessageListener.getDelegate()).waitOnEnd(id);
     }

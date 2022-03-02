@@ -40,7 +40,7 @@ public class RedisMessageSubscriberTask implements MessageListener {
                 notifyAll();
             }
         }
-        logger.info("Task: " + message.toString() + " state " + (state.get(key)==1 ? "start" : "end"));
+        logger.info("Task: " + message.toString() + " state "+ (state.get(key)==1 ? "start" : "end"));
         redisMessagePublisher.publish(key);
     }
 }
