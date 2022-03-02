@@ -3,12 +3,14 @@ package com.baeldung.spring.data.redis.queue;
 import java.util.HashMap;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class RedisMessageSubscriberAck implements MessageListener {
 
     Map<Long, Long> ack;
@@ -25,7 +27,7 @@ public class RedisMessageSubscriberAck implements MessageListener {
                 ack.put(key, value + 1L);
                 notifyAll();
             }
-            System.out.println("AckMess: " + message);
+            log.info("AckMess: " + message);
         } else {
             ack.put(key, 1L);
             notifyAll();
@@ -50,7 +52,7 @@ public class RedisMessageSubscriberAck implements MessageListener {
         // change to lock / notify scenario - non active waiting
         while(ack.size() < size || ack.values().stream().allMatch(value -> value == 2) == false){
             wait();
-            System.out.println(ack.size() + " < " + size + " " + ack.keySet() +ack.values());
+            log.info(ack.size() + " < " + size + " " + ack.keySet() +ack.values());
         }
     }
 }

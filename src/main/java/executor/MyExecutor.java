@@ -8,9 +8,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Executor który uruchamia zadania każdego typu na osobnym wątku w kolejności przyjścia
  */
+@Slf4j
 public class MyExecutor implements Executor {
 
     private Queue<Runnable> taskQueue = new LinkedList<>();
@@ -95,9 +98,9 @@ public class MyExecutor implements Executor {
         private Type checkForTaskType() {
             for(Map.Entry<Type, Queue<MyTask>> entry : inputQueues.entrySet()){
                 if(!entry.getValue().isEmpty()){
-                    if (!workersTasksTypes.get(Long.valueOf(1)).contains(entry.getKey()) &&
-                            !workersTasksTypes.get(Long.valueOf(2)).contains(entry.getKey()) &&
-                            !workersTasksTypes.get(Long.valueOf(3)).contains(entry.getKey())){
+                    if (!workersTasksTypes.get(1L).contains(entry.getKey()) &&
+                            !workersTasksTypes.get(2L).contains(entry.getKey()) &&
+                            !workersTasksTypes.get(3L).contains(entry.getKey())){
                         return entry.getKey();
                     };
                 }
@@ -118,7 +121,7 @@ public class MyExecutor implements Executor {
                         try {
                             if(current_types.isEmpty()){
                                 assignedType = checkForTaskType();
-                            }else {
+                            } else {
                                 assignedType = current_types.get(0);
                             }
                             if(assignedType != null)
@@ -136,20 +139,20 @@ public class MyExecutor implements Executor {
                                 lockObjectCondition.await();
                             }
                         } catch (Exception e) {
-                            System.out.println("worker thread interrupted");
+                            log.info("worker thread interrupted");
                             break;
                         } finally {
                             lock.unlock();
                         }
                         if(task != null) {
-                            System.out.println(task.id);
+                            log.info(task.id.toString());
                             task.run();
                         }
                     }
                 }
                 catch( Exception aE )
                 {
-                    System.err.println(aE.getMessage() + "exception caught on worker thread" );
+                    log.error(aE.getMessage() + "exception caught on worker thread" );
                 }
             }
         }

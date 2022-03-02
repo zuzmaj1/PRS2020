@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import redis.embedded.RedisServerBuilder;
 
 @RunWith(SpringRunner.class)
@@ -34,6 +35,6 @@ public class SpringBootTest {
 
     @Test
     public void testOnMessage() throws Exception {
-        tester.testAllTaskFinish(10, new MyExecutor());
+        tester.testAllTaskFinish(1000, new MyExecutor());
     }
 }

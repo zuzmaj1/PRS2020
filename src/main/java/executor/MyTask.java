@@ -27,6 +27,7 @@ public class MyTask implements RunnableWithType {
     @SneakyThrows @Override public void run() {
         redisMessagePublisher.publish(id);
         ((RedisMessageSubscriberAck) redisMessageListener.getDelegate()).waitOnStart(id);
+        // task code
         redisMessagePublisher.publish(id);
         ((RedisMessageSubscriberAck) redisMessageListener.getDelegate()).waitOnEnd(id);
     }

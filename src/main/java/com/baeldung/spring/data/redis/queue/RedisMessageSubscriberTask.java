@@ -3,6 +3,7 @@ package com.baeldung.spring.data.redis.queue;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class RedisMessageSubscriberTask implements MessageListener {
 
     final static Logger logger = LoggerFactory.getLogger(RedisMessageSubscriberTask.class);
@@ -32,7 +34,7 @@ public class RedisMessageSubscriberTask implements MessageListener {
                     state.put(key, value + 1L);
                     notifyAll();
                 }
-                System.out.println("TaskMess: " + message);
+                log.info("TaskMess: " + message);
             } else {
                 state.put(key, 1L);
                 notifyAll();
