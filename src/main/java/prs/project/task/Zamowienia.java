@@ -14,7 +14,7 @@ public enum Zamowienia {
 
     POJEDYNCZE (Arrays.asList(ZamowieniaAkcje.POJEDYNCZE_ZAMOWIENIE)),
     GRUPOWE (Arrays.asList(ZamowieniaAkcje.POJEDYNCZE_ZAMOWIENIE, ZamowieniaAkcje.GRUPOWE_ZAMOWIENIE)),
-    REZERWACJE (Arrays.asList(ZamowieniaAkcje.POJEDYNCZE_ZAMOWIENIE, ZamowieniaAkcje.REZERWACJA));
+    REZERWACJE (Arrays.asList(ZamowieniaAkcje.POJEDYNCZE_ZAMOWIENIE, ZamowieniaAkcje.REZERWACJA, ZamowieniaAkcje.ODBIÓR_REZERWACJI));
 
     Set<ZamowieniaAkcje> akceptowane;
 
