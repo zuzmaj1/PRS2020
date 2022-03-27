@@ -18,14 +18,15 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @Getter
 @Setter
-@SuperBuilder
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Akcja implements Serializable {
 
+    Long id;
     @JsonSerialize(using = EnumSerializer.class)
     @JsonDeserialize(using = EnumDeserializer.class)
-    Enum Typ;
+    Enum typ;
     Product product;
     Long liczba;
     Long klientId;

@@ -20,6 +20,7 @@ public class EnumDeserializer extends JsonDeserializer<Enum> {
         Arrays.stream(WydarzeniaAkcje.values()).forEach(val -> mapStringToEnum.put(val.toString(), WydarzeniaAkcje.valueOf(val.toString())));
         Arrays.stream(ZaopatrzenieAkcje.values()).forEach(val -> mapStringToEnum.put(val.toString(), ZaopatrzenieAkcje.valueOf(val.toString())));
         Arrays.stream(ZamowieniaAkcje.values()).forEach(val -> mapStringToEnum.put(val.toString(), ZamowieniaAkcje.valueOf(val.toString())));
+        Arrays.stream(SterowanieAkcja.values()).forEach(val -> mapStringToEnum.put(val.toString(), SterowanieAkcja.valueOf(val.toString())));
 
         return mapStringToEnum.get(parser.getValueAsString());
     }

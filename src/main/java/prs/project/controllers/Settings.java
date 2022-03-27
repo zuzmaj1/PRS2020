@@ -16,5 +16,6 @@ public class Settings {
     private String zaopatrzenie;
     private String wydarzenia;
     private Long numerIndeksu;
+    private Long liczbaZadan;
 
 }

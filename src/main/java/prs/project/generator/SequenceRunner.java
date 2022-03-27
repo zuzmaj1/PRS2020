@@ -1,4 +1,4 @@
-package prs.project;
+package prs.project.generator;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,9 +38,9 @@ import prs.project.task.ZaopatrzenieAkcje;
 
 import com.fasterxml.jackson.databind.json.JsonMapper;
 
-@Service
 @Slf4j
-public class ParallelExecutor {
+@Service
+public class SequenceRunner {
 
     @Autowired
     Ledger ledger;
@@ -55,10 +55,10 @@ public class ParallelExecutor {
     EnumMap<Product, Long> rezerwacje = new EnumMap(Product.class);
     Long promoLicznik = 0L;
 
-    public ParallelExecutor(Settings settings, List<Akcja> akcje) {
+    public SequenceRunner(Settings settings, List<Akcja> akcje) {
         this.settings = settings;
         this.akcje = akcje;
-        Arrays.stream(Product.values()).forEach(p -> sprzedaz.put(p, 0L));
+        Arrays.stream(Product.values()).forEach(p -> sprzedaz.put(p,0L));
         mojeTypy.addAll(Wycena.valueOf(settings.getWycena()).getAkceptowane());
         mojeTypy.addAll(Zamowienia.valueOf(settings.getZamowienia()).getAkceptowane());
         mojeTypy.addAll(Zaopatrzenie.valueOf(settings.getZaopatrzenie()).getAkceptowane());
@@ -71,13 +71,6 @@ public class ParallelExecutor {
             }
         });
         thread.start();
-        Thread thread2 = new Thread(() ->
-        {
-            while (active) {
-                threadProcess();
-            }
-        });
-        thread2.start();
     }
 
     public void process(Akcja jednaAkcja) {
@@ -89,13 +82,8 @@ public class ParallelExecutor {
     }
 
     public void threadProcess() {
-        Akcja akcja = null;
-        synchronized (this) {
-            if (!kolejka.isEmpty()) {
-                akcja = kolejka.pollFirst();
-            }
-        }
-        if (akcja != null) {
+        if (!kolejka.isEmpty()) {
+            Akcja akcja = kolejka.pollFirst();
             ReplyToAction odpowiedz = procesujAkcje(akcja);
             try {
                 wyslijOdpowiedzLokalnie(odpowiedz);
@@ -253,17 +241,23 @@ public class ParallelExecutor {
     }
 
     public void wyslijOdpowiedzLokalnie(ReplyToAction odpowiedz) throws IOException {
-        odpowiedz.setStudentId(settings.getNumerIndeksu());
         try {
-            ledger.addReply(odpowiedz);
+            ledger.addReplySequencer(odpowiedz);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         if(SterowanieAkcja.ZAMKNIJ_SKLEP.equals(odpowiedz.getTyp())) {
+            try {
+                ledger.evaluate(settings.getNumerIndeksu());
+            } catch(AssertionError e) {
+                e.printStackTrace();
+            }
             Warehouse magazyn = new Warehouse();
             EnumMap<Product, Long> sprzedaz = new EnumMap(Product.class);
             EnumMap<Product, Long> rezerwacje = new EnumMap(Product.class);
             Long promoLicznik = 0L;
+            ledger.clear();
         }
     }
 }
+

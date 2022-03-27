@@ -1,5 +1,6 @@
 package prs.project.redis.config;
 
+import javax.sound.midi.Sequence;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.GenericToStringSerializer;
 import prs.project.ParallelExecutor;
+import prs.project.generator.SequenceRunner;
 import prs.project.redis.queue.RedisMessagePublisherTask;
 import prs.project.redis.queue.RedisMessageSubscriberTask;
 import prs.project.task.Akcja;
@@ -24,6 +26,7 @@ import prs.project.task.Akcja;
 public class RedisConfig {
 
     @Autowired ParallelExecutor parallelExecutor;
+    @Autowired SequenceRunner sequenceRunner;
 
     @Bean
     ConcurrentHashMap<Long, Long> state() {
@@ -45,7 +48,7 @@ public class RedisConfig {
 
     @Bean(name = "listenerTask")
     MessageListenerAdapter messageListenerTask() {
-        return new MessageListenerAdapter(new RedisMessageSubscriberTask(parallelExecutor));
+        return new MessageListenerAdapter(new RedisMessageSubscriberTask(parallelExecutor, sequenceRunner));
     }
 
     @Bean(name = "containerTask")

@@ -10,6 +10,7 @@ public enum ZamowieniaAkcje {
 
     POJEDYNCZE_ZAMOWIENIE ,
     GRUPOWE_ZAMOWIENIE ,
+    ODBIÓR_REZERWACJI,
     REZERWACJA;
 
     @JsonCreator

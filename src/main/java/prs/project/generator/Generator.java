@@ -1,5 +1,7 @@
 package prs.project.generator;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -9,11 +11,14 @@ import java.util.stream.LongStream;
 import lombok.AllArgsConstructor;
 import prs.project.model.Product;
 import prs.project.task.Akcja;
+import prs.project.task.SterowanieAkcja;
 import prs.project.task.Typ;
 import prs.project.task.WycenaAkcje;
 import prs.project.task.WydarzeniaAkcje;
 import prs.project.task.ZamowieniaAkcje;
 import prs.project.task.ZaopatrzenieAkcje;
+
+import com.fasterxml.jackson.databind.json.JsonMapper;
 
 @AllArgsConstructor
 public class Generator {
@@ -46,9 +51,20 @@ public class Generator {
                     break;
                 }
             }
+            action.setId(it);
             actions.add(action);
         });
 
+        actions.add(Akcja.builder()
+                .typ(SterowanieAkcja.ZAMKNIJ_SKLEP)
+                .build());
+
+        JsonMapper mapper = new JsonMapper();
+        try {
+            mapper.writeValue(new File("input.json"), actions);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return actions;
     }
 
@@ -64,12 +80,12 @@ public class Generator {
                 LongStream.range(0, ile).forEach(it -> {
                     int productType = Math.abs(r.nextInt()) % Product.values().length;
                     Product product = Product.values()[productType];
-                    long liczba = Math.abs(r.nextLong()) % 5 + 1;
+                    long liczba = 1;
                     productList.put(product, liczba);
                 });
                 action = Akcja.builder()
                         .grupaProduktów(productList)
-                        .Typ(event)
+                        .typ(event)
                         .build();
                 break;
             }
@@ -78,8 +94,8 @@ public class Generator {
                 Product product = Product.values()[productType];
                 action = Akcja.builder()
                         .product(product)
-                        .liczba(Math.abs(r.nextLong()) % 5 + 1)
-                        .Typ(event)
+                        .liczba(1L)
+                        .typ(event)
                         .build();
                 break;
             }
@@ -101,23 +117,24 @@ public class Generator {
                 LongStream.range(0, ile).forEach(it -> {
                     int productType = Math.abs(r.nextInt()) % Product.values().length;
                     Product product = Product.values()[productType];
-                    long liczba = Math.abs(r.nextLong()) % 5 + 1;
+                    long liczba = 1;
                     productList.put(product, liczba);
                 });
                 action = Akcja.builder()
                         .grupaProduktów(productList)
-                        .Typ(event)
+                        .typ(event)
                         .build();
                 break;
             }
             case REZERWACJA:
+            case ODBIÓR_REZERWACJI:
             case POJEDYNCZE_ZAMOWIENIE: {
                 int productType = Math.abs(r.nextInt()) % Product.values().length;
                 Product product = Product.values()[productType];
                 action = Akcja.builder()
                         .product(product)
-                        .liczba(Math.abs(r.nextLong()) % 5 + 1)
-                        .Typ(event)
+                        .liczba(1L)
+                        .typ(event)
                         .build();
                 break;
             }
@@ -136,7 +153,7 @@ public class Generator {
             case INWENTARYZACJA:
             case RAPORT_SPRZEDAŻY:
                 action = Akcja.builder()
-                        .Typ(event)
+                        .typ(event)
                         .build();
                 break;
             case PRZYWROCENIE:
@@ -145,7 +162,7 @@ public class Generator {
                 Product product = Product.values()[productType];
                 action = Akcja.builder()
                         .product(product)
-                        .Typ(event)
+                        .typ(event)
                         .build();
                 break;
             }
@@ -165,7 +182,7 @@ public class Generator {
                 int productType = Math.abs(r.nextInt()) % Product.values().length;
                 Product product = Product.values()[productType];
                 action = Akcja.builder()
-                        .Typ(event)
+                        .typ(event)
                         .product(product)
                         .cena(Math.abs(r.nextLong()) % 100 + 1)
                         .build();
@@ -176,7 +193,7 @@ public class Generator {
                 Product product = Product.values()[productType];
                 action = Akcja.builder()
                         .product(product)
-                        .Typ(event)
+                        .typ(event)
                         .build();
                 break;
             }
