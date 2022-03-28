@@ -17,5 +17,4 @@ public class Settings {
     private String wydarzenia;
     private Long numerIndeksu;
     private Long liczbaZadan;
-
 }

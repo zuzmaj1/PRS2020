@@ -1,13 +1,11 @@
 package prs.project.task;
 
+import org.assertj.core.util.Sets;
+import lombok.Getter;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-
-import lombok.Getter;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.google.common.collect.Sets;
 
 @Getter
 public enum Wydarzenia {
