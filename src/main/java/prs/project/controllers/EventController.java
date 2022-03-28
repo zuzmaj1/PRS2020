@@ -29,7 +29,7 @@ public class EventController {
     RedisMessagePublisherTask redisMessagePublisher;
     Settings settings;
 
-    @GetMapping(value = "/generate", consumes = "application/json")
+    @GetMapping(value = "/generate")
     public ResponseEntity<String> generateActions() {
         Generator generator = new Generator(settings.getLiczbaZadan());
         List<Akcja> akcje = generator.generate();
