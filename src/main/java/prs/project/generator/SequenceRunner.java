@@ -59,6 +59,8 @@ public class SequenceRunner {
         this.settings = settings;
         this.akcje = akcje;
         Arrays.stream(Product.values()).forEach(p -> sprzedaz.put(p,0L));
+        Arrays.stream(Product.values()).forEach(p -> rezerwacje.put(p, 0L));
+
         mojeTypy.addAll(Wycena.valueOf(settings.getWycena()).getAkceptowane());
         mojeTypy.addAll(Zamowienia.valueOf(settings.getZamowienia()).getAkceptowane());
         mojeTypy.addAll(Zaopatrzenie.valueOf(settings.getZaopatrzenie()).getAkceptowane());
@@ -255,6 +257,10 @@ public class SequenceRunner {
             Warehouse magazyn = new Warehouse();
             EnumMap<Product, Long> sprzedaz = new EnumMap(Product.class);
             EnumMap<Product, Long> rezerwacje = new EnumMap(Product.class);
+            Arrays.stream(Product.values()).forEach(p -> rezerwacje.put(p, 0L));
+            Arrays.stream(Product.values()).forEach(p -> sprzedaz.put(p, 0L));
+
+
             Long promoLicznik = 0L;
             ledger.clear();
         }
