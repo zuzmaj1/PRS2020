@@ -17,5 +17,7 @@ public class Settings {
     private String wydarzenia;
     private Long numerIndeksu;
     private Long liczbaZadan;
+    private String redisHost;
+    private Integer redisPort;
 
 }

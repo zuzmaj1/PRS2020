@@ -1,12 +1,9 @@
-spring:
-  redis:
-    host: localhost
-    port: 8989
-
 ustawienia:
-  numerIndeksu: 287046
+  numerIndeksu: 111222
   wycena: "CENY_BEZ_ZMIAN"
   zamowienia: "POJEDYNCZE"
   zaopatrzenie: "POJEDYNCZE"
   wydarzenia: "WYCOFANIE"
   liczbaZadan: 200
+  redisHost: "192.168.50.178"
+  redisPort: 6379

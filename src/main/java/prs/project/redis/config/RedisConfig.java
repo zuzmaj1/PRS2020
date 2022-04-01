@@ -1,6 +1,5 @@
 package prs.project.redis.config;
 
-import javax.sound.midi.Sequence;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
@@ -15,7 +15,7 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.GenericToStringSerializer;
 import prs.project.ParallelExecutor;
-import prs.project.generator.SequenceRunner;
+import prs.project.controllers.Settings;
 import prs.project.redis.queue.RedisMessagePublisherTask;
 import prs.project.redis.queue.RedisMessageSubscriberTask;
 import prs.project.task.Akcja;
@@ -26,7 +26,7 @@ import prs.project.task.Akcja;
 public class RedisConfig {
 
     @Autowired ParallelExecutor parallelExecutor;
-    @Autowired SequenceRunner sequenceRunner;
+    @Autowired Settings settings;
 
     @Bean
     ConcurrentHashMap<Long, Long> state() {
@@ -35,7 +35,8 @@ public class RedisConfig {
 
     @Bean
     JedisConnectionFactory jedisConnectionFactory() {
-        return new JedisConnectionFactory();
+        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(settings.getRedisHost(), settings.getRedisPort());
+        return new JedisConnectionFactory(redisStandaloneConfiguration);
     }
 
     @Bean
@@ -48,7 +49,7 @@ public class RedisConfig {
 
     @Bean(name = "listenerTask")
     MessageListenerAdapter messageListenerTask() {
-        return new MessageListenerAdapter(new RedisMessageSubscriberTask(parallelExecutor, sequenceRunner));
+        return new MessageListenerAdapter(new RedisMessageSubscriberTask(parallelExecutor));
     }
 
     @Bean(name = "containerTask")
