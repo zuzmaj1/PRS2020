@@ -1,9 +1,9 @@
 ustawienia:
-  numerIndeksu: 111222
+  numerIndeksu: 22222
   wycena: "CENY_BEZ_ZMIAN"
   zamowienia: "POJEDYNCZE"
   zaopatrzenie: "POJEDYNCZE"
   wydarzenia: "WYCOFANIE"
   liczbaZadan: 200
-  redisHost: "192.168.50.178"
-  redisPort: 6379
+  redisHost: "150.254.68.196"
+  redisPort: 8989
