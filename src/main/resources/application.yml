@@ -1,6 +1,3 @@
-server:
-  port : 8081
-
 ustawienia:
   numerIndeksu: 287046
   wycena: "CENA_ZMIENNA"
