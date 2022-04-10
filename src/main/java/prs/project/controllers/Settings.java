@@ -19,5 +19,5 @@ public class Settings {
     private Long liczbaZadan;
     private String redisHost;
     private Integer redisPort;
-
+    private Boolean activeRedis;
 }

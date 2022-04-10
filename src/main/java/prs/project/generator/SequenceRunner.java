@@ -212,8 +212,11 @@ public class SequenceRunner {
         }
 
         if (SterowanieAkcja.ZAMKNIJ_SKLEP.equals(akcja.getTyp())) {
-            odpowiedz.setStanMagazynów(magazyn.getStanMagazynowy());
-            odpowiedz.setGrupaProduktów(magazyn.getCeny());
+            odpowiedz.setStanMagazynów(magazyn.getStanMagazynowy().clone());
+            odpowiedz.setGrupaProduktów(magazyn.getCeny().clone());
+            Arrays.stream(Product.values()).forEach(p -> sprzedaz.put(p, 0L));
+            Arrays.stream(Product.values()).forEach(p -> rezerwacje.put(p, 0L));
+            magazyn = new Warehouse();
         }
         return odpowiedz;
     }

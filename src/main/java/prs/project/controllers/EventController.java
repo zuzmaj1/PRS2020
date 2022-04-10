@@ -1,7 +1,5 @@
 package prs.project.controllers;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -18,7 +16,6 @@ import prs.project.ParallelExecutor;
 import prs.project.checker.Ledger;
 import prs.project.generator.Generator;
 import prs.project.generator.SequenceRunner;
-import prs.project.redis.queue.RedisMessagePublisherTask;
 import prs.project.status.ReplyToAction;
 import prs.project.task.Akcja;
 
