@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import lombok.extern.slf4j.Slf4j;
@@ -49,11 +51,19 @@ public class ParallelExecutor {
     List<Akcja> akcje = new ArrayList<>();
     boolean active = true;
     Set<Enum> mojeTypy = new HashSet<>();
-    ConcurrentLinkedDeque<Akcja> kolejka = new ConcurrentLinkedDeque();
+    ConcurrentLinkedDeque<Akcja> kolejkaRaport = new ConcurrentLinkedDeque();
+    ConcurrentLinkedDeque<Akcja> kolejkaZakupy = new ConcurrentLinkedDeque();
+    ConcurrentLinkedDeque<Akcja> kolejkaCeny = new ConcurrentLinkedDeque();
     Warehouse magazyn = new Warehouse();
     EnumMap<Product, Long> sprzedaz = new EnumMap(Product.class);
     EnumMap<Product, Long> rezerwacje = new EnumMap(Product.class);
     Long promoLicznik = 0L;
+    AtomicBoolean last = new AtomicBoolean(false);
+    AtomicBoolean sprawdzCeny = new AtomicBoolean(false);
+    AtomicBoolean sprawdzZakupy = new AtomicBoolean(false);
+
+    CountDownLatch latch = new CountDownLatch(3);
+
 
     public ParallelExecutor(Settings settings, List<Akcja> akcje) {
         this.settings = settings;
@@ -68,35 +78,91 @@ public class ParallelExecutor {
         mojeTypy.addAll(Arrays.asList(SterowanieAkcja.values()));
         Thread thread = new Thread(() ->
         {
-            while (active) {
-                threadProcess();
+            while (threadProcessZakupy()) {
             }
         });
         thread.start();
         Thread thread2 = new Thread(() ->
         {
-            while (active) {
-                threadProcess();
+            while (threadProcessCeny()) {
             }
         });
         thread2.start();
+        Thread thread3 = new Thread(() ->
+        {
+            while (active) {
+                threadProcessAkcje();
+            }
+        });
+        thread3.start();
     }
 
     public void process(Akcja jednaAkcja) {
         Stream.of(jednaAkcja)
                 .filter(akcja -> mojeTypy.contains(akcja.getTyp()))
                 .forEach(akcja -> {
-                    kolejka.add(akcja);
+                    if (Wycena.valueOf(settings.getWycena()).getAkceptowane().contains(akcja.getTyp())) {
+                        kolejkaCeny.addLast(akcja);
+                    }
+                    if (Zamowienia.valueOf(settings.getZamowienia()).getAkceptowane().contains(akcja.getTyp())
+                            || Zaopatrzenie.valueOf(settings.getZaopatrzenie()).getAkceptowane().contains(akcja.getTyp())) {
+                        kolejkaZakupy.addLast(akcja);
+                    }
+                    if (Wydarzenia.valueOf(settings.getWydarzenia()).getAkceptowane().contains(akcja.getTyp()) ||
+                            akcja.getTyp().equals(SterowanieAkcja.ZAMKNIJ_SKLEP)) {
+                        kolejkaRaport.addLast(akcja);
+                        if(akcja.getTyp().equals(SterowanieAkcja.ZAMKNIJ_SKLEP)) last.set(true);
+                    }
                 });
     }
 
-    public void threadProcess() {
+    public boolean threadProcessZakupy() {
         Akcja akcja = null;
-        synchronized (this) {
-            if (!kolejka.isEmpty()) {
-                akcja = kolejka.pollFirst();
+        akcja = kolejkaZakupy.pollFirst();
+        if (akcja != null) {
+            ReplyToAction odpowiedz = procesujAkcje(akcja);
+            try {
+                wyslijOdpowiedzLokalnie(odpowiedz);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            if(last.get() && sprawdzZakupy.get()) {
+                latch.countDown();
+                return false;
+            }
+            if(last.get()) {
+                sprawdzZakupy.set(true);
             }
         }
+        return true;
+    }
+
+    public boolean threadProcessCeny() {
+        Akcja akcja = null;
+        akcja = kolejkaCeny.pollFirst();
+        if (akcja != null) {
+            ReplyToAction odpowiedz = procesujAkcje(akcja);
+            try {
+                wyslijOdpowiedzLokalnie(odpowiedz);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            if(last.get() && sprawdzCeny.get()) {
+                latch.countDown();
+                return false;
+            }
+            if(last.get()) {
+                sprawdzCeny.set(true);
+            }
+        }
+        return true;
+    }
+
+    public void threadProcessAkcje() {
+        Akcja akcja = null;
+        akcja = kolejkaRaport.pollFirst();
         if (akcja != null) {
             ReplyToAction odpowiedz = procesujAkcje(akcja);
             try {
@@ -131,10 +197,10 @@ public class ParallelExecutor {
         }
 
         if (WydarzeniaAkcje.RAPORT_SPRZEDAŻY.equals(akcja.getTyp())) {
-            odpowiedz.setRaportSprzedaży(sprzedaz);
+            odpowiedz.setRaportSprzedaży(sprzedaz.clone());
         }
         if (WydarzeniaAkcje.INWENTARYZACJA.equals(akcja.getTyp())) {
-            odpowiedz.setStanMagazynów(magazyn.getStanMagazynowy());
+            odpowiedz.setStanMagazynów(magazyn.getStanMagazynowy().clone());
         }
         if (WydarzeniaAkcje.WYCOFANIE.equals(akcja.getTyp())) {
             magazyn.getStanMagazynowy().put(akcja.getProduct(), -9999999L);
@@ -207,7 +273,7 @@ public class ParallelExecutor {
             odpowiedz.setLiczba(akcja.getLiczba());
             Long naMagazynie = magazyn.getStanMagazynowy().get(akcja.getProduct());
             odpowiedz.setZebraneZaopatrzenie(true);
-            if(magazyn.getStanMagazynowy().get(akcja.getProduct()) >= 0) {
+            if (magazyn.getStanMagazynowy().get(akcja.getProduct()) >= 0) {
                 magazyn.getStanMagazynowy().put(akcja.getProduct(), naMagazynie + akcja.getLiczba());
             }
         }
@@ -217,13 +283,19 @@ public class ParallelExecutor {
             akcja.getGrupaProduktów().entrySet().stream()
                     .forEach(produkt -> {
                         Long naMagazynie = magazyn.getStanMagazynowy().get(produkt.getKey());
-                        if(magazyn.getStanMagazynowy().get(produkt.getKey()) >= 0) {
+                        if (magazyn.getStanMagazynowy().get(produkt.getKey()) >= 0) {
                             magazyn.getStanMagazynowy().put(produkt.getKey(), naMagazynie + produkt.getValue());
                         }
                     });
         }
 
         if (SterowanieAkcja.ZAMKNIJ_SKLEP.equals(akcja.getTyp())) {
+            latch.countDown();
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             odpowiedz.setStanMagazynów(magazyn.getStanMagazynowy());
             odpowiedz.setGrupaProduktów(magazyn.getCeny());
         }
@@ -261,7 +333,7 @@ public class ParallelExecutor {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        if(SterowanieAkcja.ZAMKNIJ_SKLEP.equals(odpowiedz.getTyp())) {
+        if (SterowanieAkcja.ZAMKNIJ_SKLEP.equals(odpowiedz.getTyp())) {
             Warehouse magazyn = new Warehouse();
             EnumMap<Product, Long> sprzedaz = new EnumMap(Product.class);
             EnumMap<Product, Long> rezerwacje = new EnumMap(Product.class);
