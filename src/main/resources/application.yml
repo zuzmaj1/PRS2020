@@ -1,12 +1,10 @@
-spring:
-  redis:
-    host: localhost
-    port: 8989
+server:
+  port : 8081
 
 ustawienia:
   numerIndeksu: 287046
-  wycena: "CENY_BEZ_ZMIAN"
-  zamowienia: "POJEDYNCZE"
-  zaopatrzenie: "POJEDYNCZE"
-  wydarzenia: "WYCOFANIE"
-  liczbaZadan: 200
+  wycena: "CENA_ZMIENNA"
+  zamowienia: "GRUPOWE"
+  zaopatrzenie: "GRUPOWE"
+  wydarzenia: "RAPORT_SPRZEDAŻY"
+  liczbaZadan: 800
