@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -46,7 +47,7 @@ public class EventController {
     }
 
     @PostMapping(value = "/log", produces = "application/json")
-    public ResponseEntity<ReplyToAction> logAction(@RequestBody ReplyToAction odpowiedz) throws InterruptedException {
+    public ResponseEntity<ReplyToAction> logAction(@RequestBody @Validated ReplyToAction odpowiedz) throws InterruptedException {
         ledger.addReply(odpowiedz);
         return new ResponseEntity<>(odpowiedz, HttpStatus.OK);
     }

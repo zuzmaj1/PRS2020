@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -232,13 +233,15 @@ public class ParallelExecutor {
 
     public void wyslijOdpowiedz(ReplyToAction odpowiedz) throws IOException {
         odpowiedz.setStudentId(settings.getNumerIndeksu());
-        HttpPost post = new HttpPost("http://localhost:8080/action/log");
+        HttpPost post = new HttpPost("http://"+settings.getRedisHost()+":8080/action/log");
 
         JsonMapper mapper = new JsonMapper();
         String json = mapper.writeValueAsString(odpowiedz);
-        StringEntity entity = new StringEntity(json);
-        log.info(json);
-        post.setEntity(entity);
+
+        StringEntity requestEntity = new StringEntity(
+                json,
+                ContentType.APPLICATION_JSON);
+        post.setEntity(requestEntity);
         post.setHeader("Accept", "application/json");
         post.setHeader("Content-type", "application/json");
 
