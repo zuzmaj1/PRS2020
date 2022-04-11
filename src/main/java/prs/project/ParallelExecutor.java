@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import lombok.extern.slf4j.Slf4j;
@@ -54,9 +56,10 @@ public class ParallelExecutor {
     Warehouse magazyn = new Warehouse();
     EnumMap<Product, Long> sprzedaz = new EnumMap(Product.class);
     EnumMap<Product, Long> rezerwacje = new EnumMap(Product.class);
-    Long promoLicznik = 0L;
+    AtomicLong promoLicznik = new AtomicLong(0L);
 
     public ParallelExecutor(Settings settings, List<Akcja> akcje) {
+        sprzedaz.keySet().stream().collect(Collectors.toList());
         this.settings = settings;
         this.akcje = akcje;
         Arrays.stream(Product.values()).forEach(p -> sprzedaz.put(p, 0L));
@@ -119,9 +122,10 @@ public class ParallelExecutor {
             odpowiedz.setProdukt(akcja.getProduct());
             odpowiedz.setCena(magazyn.getCeny().get(akcja.getProduct()));
             if (mojeTypy.contains(Wycena.PROMO_CO_10_WYCEN)) {
-                promoLicznik++;
-                if (promoLicznik == 10)
+                promoLicznik.incrementAndGet();
+                if (promoLicznik.get() ==  10L)
                     odpowiedz.setCena(0L);
+                    promoLicznik.set(0L);
             }
         }
         if (WycenaAkcje.ZMIEN_CENE.equals(akcja.getTyp())) {
@@ -230,6 +234,7 @@ public class ParallelExecutor {
             Arrays.stream(Product.values()).forEach(p -> sprzedaz.put(p, 0L));
             Arrays.stream(Product.values()).forEach(p -> rezerwacje.put(p, 0L));
             magazyn = new Warehouse();
+            promoLicznik.set(0L);
         }
         return odpowiedz;
     }
